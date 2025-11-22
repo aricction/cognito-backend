@@ -7,12 +7,12 @@ function otpExpiry(): Date {
 }
 
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
-import { CommonService } from 'src/common/common.service';
+import { PrismaService } from '@/prisma/prisma.service';
+import { CommonService } from '@/common/common.service';
 import { CreateUserByRegisterRequest } from './data-transfer-objects/register.dto';
 import { GetUserByLoginRequest } from './data-transfer-objects/login.dto';
 import {VerifyOtpDto} from './data-transfer-objects/verify-otp.dto'
-import {MailAlertService} from "src/email-alerts/mail.service";
+import { MailAlertService } from '@/email-alerts/mail.service';
 import * as jwt from "jsonwebtoken";
 
 

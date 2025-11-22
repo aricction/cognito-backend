@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service';
-import { MailAlertService } from 'src/email-alerts/mail.service';
+import { PrismaService } from '@/prisma/prisma.service';
 import { CreateOrderRequest } from '../auth/data-transfer-objects/create-order.dto';
-
+import { MailAlertService } from '@/email-alerts/mail.service';
 @Injectable()
 export class OrderService {
   constructor(
