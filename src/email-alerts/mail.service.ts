@@ -1,45 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import * as sgMail from '@sendgrid/mail';
 
-const { EMAIL_USER, EMAIL_PASS } = process.env;
+const { SENDGRID_API_KEY, EMAIL_USER } = process.env;
 
 @Injectable()
 export class MailAlertService {
-  private transporter;
+  private readonly sendGridApiKey: string;
+  private readonly emailUser: string;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,       // TLS port
-      secure: false,   // false for TLS (port 587)
-      auth: {
-        user: EMAIL_USER,
-        pass: EMAIL_PASS, // App Password recommended
-      },
-      tls: {
-        rejectUnauthorized: false, // Render sometimes needs this
-      },
-    });
+    if (!SENDGRID_API_KEY) {
+      throw new Error('SENDGRID_API_KEY is not defined in environment variables');
+    }
+    if (!EMAIL_USER) {
+      throw new Error('EMAIL_USER is not defined in environment variables');
+    }
+    this.sendGridApiKey = SENDGRID_API_KEY;
+    this.emailUser = EMAIL_USER;
+    sgMail.setApiKey(this.sendGridApiKey);
   }
 
   async sendOTP(to: string, otp: string) {
-    try {
-      const mailOptions = {
-        from: EMAIL_USER,
-        to,
-        subject: 'Your OTP Code',
-        text: `Your OTP is: ${otp}`,
-        html: `
-          <h2>OTP Verification</h2>
-          <p>Your OTP is:</p>
-          <h1 style="color:#4CAF50;">${otp}</h1>
-          <p>This OTP is valid for 5 minutes.</p>
-        `,
-      };
+    const msg = {
+      to,
+      from: this.emailUser,
+      subject: 'Your OTP Code',
+      text: `Your OTP is: ${otp}`,
+      html: `
+        <h2>OTP Verification</h2>
+        <p>Your OTP is:</p>
+        <h1 style="color:#4CAF50;">${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `,
+    };
 
-      const result = await this.transporter.sendMail(mailOptions);
+    try {
+      await sgMail.send(msg);
       console.log(`OTP email sent to ${to}`);
-      return result;
+      return { success: true };
     } catch (error) {
       console.error('Error sending OTP email:', error);
       throw error;
@@ -47,18 +45,18 @@ export class MailAlertService {
   }
 
   async sendEmail(to: string, subject: string, html: string, text?: string) {
-    try {
-      const mailOptions = {
-        from: EMAIL_USER,
-        to,
-        subject,
-        text: text || subject,
-        html,
-      };
+    const msg = {
+      to,
+      from: this.emailUser,
+      subject,
+      text: text || subject,
+      html,
+    };
 
-      const result = await this.transporter.sendMail(mailOptions);
+    try {
+      await sgMail.send(msg);
       console.log(`Email sent to ${to}: ${subject}`);
-      return result;
+      return { success: true };
     } catch (error) {
       console.error('Error sending email:', error);
       throw error;
