@@ -9,10 +9,15 @@ export class MailAlertService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,       // TLS port
+      secure: false,   // false for TLS (port 587)
       auth: {
         user: EMAIL_USER,
-        pass: EMAIL_PASS,
+        pass: EMAIL_PASS, // App Password recommended
+      },
+      tls: {
+        rejectUnauthorized: false, // Render sometimes needs this
       },
     });
   }
@@ -34,10 +39,9 @@ export class MailAlertService {
 
       const result = await this.transporter.sendMail(mailOptions);
       console.log(`OTP email sent to ${to}`);
-
       return result;
     } catch (error) {
-      console.log('Error sending OTP email:', error);
+      console.error('Error sending OTP email:', error);
       throw error;
     }
   }
@@ -54,10 +58,9 @@ export class MailAlertService {
 
       const result = await this.transporter.sendMail(mailOptions);
       console.log(`Email sent to ${to}: ${subject}`);
-
       return result;
     } catch (error) {
-      console.log('Error sending email:', error);
+      console.error('Error sending email:', error);
       throw error;
     }
   }
